@@ -1,145 +1,140 @@
-"""Draws network-{light,dark}.svg, the profile banner. The network is not a drawing.
+"""Draws manifold-{light,dark}.svg, the profile banner. The surface is not a drawing.
 
-A 64-16-16-10 multilayer perceptron is trained on scikit-learn's handwritten
-digits, then shown reading one held-out digit. The first layer is that
-digit's 8x8 pixels, every node's brightness is its real activation, and the
-edges are the connections carrying the most signal (|activation x weight|),
-blue when they push a neuron up and red when they push it down. The layers
-are placed in 3D and projected with perspective, nearest drawn last.
+An autoencoder (64 -> 64 -> 32 -> 2 -> 32 -> 64 -> 64, tanh) is trained to squeeze each of
+scikit-learn's 8x8 handwritten digits through just two numbers and rebuild it.
+Sweeping those two numbers over a grid and decoding every point traces out the
+decoder's latent manifold: a curved 2D sheet inside 64-dimensional pixel space.
+The sheet is placed in 3D by its first three principal components, shaded by
+how it faces a light, and the real digits sit on it where the encoder put
+them, coloured by which digit they are.
 
     python3 make_banner.py
 """
 import numpy as np
 from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import PCA
+from sklearn.neural_network import MLPRegressor
 
 X, y = load_digits(return_X_y=True)
 X = X / 16.0
-Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
-net = MLPClassifier(hidden_layer_sizes=(16, 16), max_iter=2000, random_state=0).fit(Xtr, ytr)
-ACC = net.score(Xte, yte)
-
-# one held-out 3 the network gets right
-i = next(k for k in range(len(yte)) if yte[k] == 3 and net.predict(Xte[k:k + 1])[0] == 3)
-acts = [Xte[i]]
-for W, b in zip(net.coefs_[:-1], net.intercepts_[:-1]):
-    acts.append(np.maximum(0, acts[-1] @ W + b))
-acts.append(net.predict_proba(Xte[i:i + 1])[0])
-acts = [a / (a.max() + 1e-12) for a in acts]
-
-# layer geometry in world coordinates: u runs across, (gy, gz) is each layer's own grid
-SHAPES = [(8, 8, 0.17), (4, 4, 0.34), (4, 4, 0.34), (10, 1, 0.155)]
-U = [-1.7, -0.45, 0.65, 1.65]
-nodes = []   # per layer: array of (u, gy, gz)
-for (rows, cols, sp), u in zip(SHAPES, U):
-    r, c = np.meshgrid(np.arange(rows), np.arange(cols), indexing="ij")
-    gy = -(r - (rows - 1) / 2) * sp
-    gz = -(c - (cols - 1) / 2) * sp    # columns run left to right as seen by the camera
-    nodes.append(np.column_stack([np.full(r.size, u), gy.ravel(), gz.ravel()]))
-
-YAW, PITCH, CAM = np.radians(55), np.radians(16), 4.6
+ae = MLPRegressor(hidden_layer_sizes=(64, 32, 2, 32, 64), activation="tanh", max_iter=4000,
+                  random_state=0, learning_rate_init=0.002, tol=1e-6, n_iter_no_change=50).fit(X, X)
+W, B = ae.coefs_, ae.intercepts_
+MID = 3                                # layers up to and including the 2-unit bottleneck
 
 
-def project(p):
-    u, gy, gz = p[..., 0], p[..., 1], p[..., 2]
-    x1 = u * np.cos(YAW) - gz * np.sin(YAW)
-    z1 = u * np.sin(YAW) + gz * np.cos(YAW)
-    y1 = gy * np.cos(PITCH) - z1 * np.sin(PITCH)
-    z2 = gy * np.sin(PITCH) + z1 * np.cos(PITCH)
-    s = CAM / (CAM + z2)
-    return np.stack([x1 * s, -y1 * s, s, z2], axis=-1)
+def encode(x):
+    for w, b in zip(W[:MID], B[:MID]):
+        x = np.tanh(x @ w + b)
+    return x
 
 
-P = [project(n) for n in nodes]
-allp = np.vstack(P)
-X0, X1, Y0, Y1 = 452, 790, 18, 204
-scale = min((X1 - X0) / np.ptp(allp[:, 0]), (Y1 - Y0) / np.ptp(allp[:, 1]))
-ox = X0 + ((X1 - X0) - np.ptp(allp[:, 0]) * scale) / 2 - allp[:, 0].min() * scale
-oy = Y0 + ((Y1 - Y0) - np.ptp(allp[:, 1]) * scale) / 2 - allp[:, 1].min() * scale
+def decode(z):
+    for w, b in zip(W[MID:-1], B[MID:-1]):
+        z = np.tanh(z @ w + b)
+    return z @ W[-1] + B[-1]
 
 
-def screen(q):
-    return q[..., 0] * scale + ox, q[..., 1] * scale + oy
+Z = encode(X)
+lo, hi = np.percentile(Z, 0.5, axis=0), np.percentile(Z, 99.5, axis=0)
+N = 46
+g0, g1 = np.meshgrid(np.linspace(lo[0], hi[0], N), np.linspace(lo[1], hi[1], N), indexing="ij")
+surf_hd = decode(np.column_stack([g0.ravel(), g1.ravel()]))
+pca = PCA(3).fit(surf_hd)
+S = pca.transform(surf_hd).reshape(N, N, 3)
+D = pca.transform(decode(Z))          # every digit, sitting on the sheet
+R2 = 1 - ((ae.predict(X) - X) ** 2).sum() / ((X - X.mean(0)) ** 2).sum()
+
+# normalise to a unit box, then camera
+c = S.reshape(-1, 3).mean(0); s = np.abs(S.reshape(-1, 3) - c).max()
+S, D = (S - c) / s, (D - c) / s
+YAW, PITCH, CAM = np.radians(38), np.radians(24), 4.0
 
 
-# strongest connections between consecutive layers
-KEEP = [70, 45, 24]
-edges = []   # (layer, i, j, signed strength 0..1)
-for L, W in enumerate(net.coefs_):
-    contrib = acts[L][:, None] * W
-    flat = np.argsort(-np.abs(contrib).ravel())[:KEEP[L]]
-    top = np.abs(contrib).ravel()[flat[0]]
-    for f in flat:
-        a, b = np.unravel_index(f, W.shape)
-        edges.append((L, a, b, contrib[a, b] / top))
+def cam(p):
+    x, y_, z = p[..., 0], p[..., 1], p[..., 2]
+    x1 = x * np.cos(YAW) - z * np.sin(YAW)
+    z1 = x * np.sin(YAW) + z * np.cos(YAW)
+    y1 = y_ * np.cos(PITCH) - z1 * np.sin(PITCH)
+    z2 = y_ * np.sin(PITCH) + z1 * np.cos(PITCH)
+    return np.stack([x1, y1, z2], axis=-1)
 
-pred = int(np.argmax(acts[-1]))
+
+CS, CD = cam(S), cam(D)
+
+
+def proj(q):
+    k = CAM / (CAM + q[..., 2])
+    return np.stack([q[..., 0] * k, -q[..., 1] * k], axis=-1)
+
+
+PS, PD = proj(CS), proj(CD)
+allp = PS.reshape(-1, 2)
+X0, X1, Y0, Y1 = 440, 792, 14, 206
+span = np.ptp(allp, axis=0)
+scale = min((X1 - X0) / span[0], (Y1 - Y0) / span[1])
+off = np.array([X0 + ((X1 - X0) - span[0] * scale) / 2, Y0 + ((Y1 - Y0) - span[1] * scale) / 2]) - allp.min(0) * scale
+PS, PD = PS * scale + off, PD * scale + off
+
+LIGHT = np.array([-0.4, 0.7, -0.6]); LIGHT /= np.linalg.norm(LIGHT)
+
+
+def mix(a, b, t):
+    a = np.array([int(a[i:i + 2], 16) for i in (1, 3, 5)]); b = np.array([int(b[i:i + 2], 16) for i in (1, 3, 5)])
+    return "#%02x%02x%02x" % tuple(np.clip(np.round(a + (b - a) * t), 0, 255).astype(int))
+
 
 THEMES = {
     "light": dict(bg="#ffffff", fg="#1f2328", sub="#59636e", rule="#d1d9e0",
-                  on="#0969da", hi="#ffffff", off="#d8dee4", offhi="#ffffff", neg="#cf222e",
-                  plate="#0969da", plate_op=0.05),
+                  lo="#c6dcf7", hi="#0550ae", wire="#0550ae", wire_op=0.10,
+                  digits=["#0969da", "#cf222e", "#1a7f37", "#8250df", "#bf8700",
+                          "#e16f24", "#1b7c83", "#bf3989", "#57606a", "#4d2d00"]),
     "dark": dict(bg="#0d1117", fg="#f0f6fc", sub="#9198a1", rule="#3d444d",
-                 on="#58a6ff", hi="#e6f1ff", off="#262c36", offhi="#484f58", neg="#ff7b72",
-                 plate="#58a6ff", plate_op=0.06),
+                 lo="#0b1f38", hi="#9ecbff", wire="#a5d6ff", wire_op=0.08,
+                 digits=["#58a6ff", "#ff7b72", "#3fb950", "#d2a8ff", "#e3b341",
+                         "#ffa657", "#39c5cf", "#f778ba", "#b1bac4", "#ffdfb6"]),
 }
 
+rng = np.random.default_rng(0)
+show = rng.choice(len(D), 420, replace=False)
+
 for name, t in THEMES.items():
-    out = []
-    # translucent plate behind each layer, so the grids read as planes in space
-    for (rows, cols, sp), u in zip(SHAPES, U):
-        hy, hz = (rows - 1) / 2 * sp + sp * 0.6, (cols - 1) / 2 * sp + sp * 0.6
-        corners = np.array([[u, hy, -hz], [u, hy, hz], [u, -hy, hz], [u, -hy, -hz]])
-        sx, sy = screen(project(corners))
-        pts = " ".join(f"{a:.1f},{b:.1f}" for a, b in zip(sx, sy))
-        out.append(f'<polygon points="{pts}" fill="{t["plate"]}" fill-opacity="{t["plate_op"]}" '
-                   f'stroke="{t["plate"]}" stroke-opacity="0.18" stroke-width="0.8"/>')
-    for L, a, b, s in sorted(edges, key=lambda e: abs(e[3])):
-        x1, y1 = screen(P[L][a]); x2, y2 = screen(P[L + 1][b])
-        depth = (P[L][a][2] + P[L + 1][b][2]) / 2
-        col = t["on"] if s > 0 else t["neg"]
-        op = 0.06 + 0.5 * abs(s) ** 1.2
-        out.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" '
-                   f'stroke-opacity="{op:.2f}" stroke-width="{0.5 + 1.1 * abs(s) * depth:.2f}"/>')
-    order = sorted(((L, k) for L in range(4) for k in range(len(P[L]))), key=lambda lk: -P[lk[0]][lk[1]][3])
-    for L, k in order:
-        cx, cy = screen(P[L][k])
-        r = (3.0 if L == 0 else 3.8 if L < 3 else 2.9) * P[L][k][2]
-        a = float(acts[L][k])
-        out.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.2f}" fill="url(#off-{name})"/>')
-        if a > 0.02:
-            out.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.2f}" fill="url(#on-{name})" '
-                       f'fill-opacity="{min(1, 0.15 + a):.2f}"/>')
-        if L == 3 and k == pred:
-            out.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r + 2.4:.2f}" fill="none" '
-                       f'stroke="{t["neg"]}" stroke-width="1.3"/>')
-            out.append(f'<text x="{cx + r + 6:.1f}" y="{cy + 3.5:.1f}" font-size="10" fill="{t["sub"]}" '
-                       f'font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', Helvetica, Arial, sans-serif">'
-                       f'"{pred}"</text>')
+    items = []   # (depth, svg)
+    for i in range(N - 1):
+        for j in range(N - 1):
+            quad3 = CS[[i, i + 1, i + 1, i], [j, j, j + 1, j + 1]]
+            n = np.cross(quad3[1] - quad3[0], quad3[3] - quad3[0])
+            n /= np.linalg.norm(n) + 1e-12
+            lam = abs(n @ LIGHT)                      # two-sided surface
+            near = np.clip((1.2 - quad3[:, 2].mean()) / 2.4, 0, 1)   # nearer faces a touch brighter
+            col = mix(t["lo"], t["hi"], 0.05 + 0.95 * lam ** 1.8 * (0.55 + 0.45 * near))
+            q2 = PS[[i, i + 1, i + 1, i], [j, j, j + 1, j + 1]]
+            pts = " ".join(f"{a:.1f},{b:.1f}" for a, b in q2)
+            items.append((quad3[:, 2].mean(),
+                          f'<polygon points="{pts}" fill="{col}" fill-opacity="0.9" stroke="{t["wire"]}" '
+                          f'stroke-opacity="{t["wire_op"]}" stroke-width="0.5"/>'))
+    for k in show:
+        x, y_ = PD[k]
+        r = 2.1 * CAM / (CAM + CD[k, 2])
+        items.append((CD[k, 2] - 0.02,
+                      f'<circle cx="{x:.1f}" cy="{y_:.1f}" r="{r:.2f}" fill="{t["digits"][y[k]]}" '
+                      f'stroke="{t["bg"]}" stroke-width="0.6"/>'))
+    body = "".join(svg for _, svg in sorted(items, key=lambda it: -it[0]))
 
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="806" height="220" viewBox="0 0 806 220">
-  <defs>
-    <radialGradient id="on-{name}" cx="35%" cy="32%" r="70%">
-      <stop offset="0%" stop-color="{t["hi"]}"/><stop offset="45%" stop-color="{t["on"]}"/>
-      <stop offset="100%" stop-color="{t["on"]}" stop-opacity="0.75"/>
-    </radialGradient>
-    <radialGradient id="off-{name}" cx="35%" cy="32%" r="70%">
-      <stop offset="0%" stop-color="{t["offhi"]}"/><stop offset="100%" stop-color="{t["off"]}"/>
-    </radialGradient>
-  </defs>
   <rect width="806" height="220" rx="10" fill="{t["bg"]}"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
     <text x="28" y="72" font-size="34" font-weight="700" fill="{t["fg"]}">Sanjay Mavalli</text>
     <text x="28" y="104" font-size="15" fill="{t["fg"]}">Co-founder &amp; CEO, SAAChronicle (Sacron)</text>
     <text x="28" y="128" font-size="15" fill="{t["sub"]}">Math &amp; Computing @ Georgia Tech</text>
     <text x="28" y="152" font-size="15" fill="{t["sub"]}">quant models · ML · number theory</text>
-    <text x="28" y="196" font-size="11" fill="{t["sub"]}">right: a trained network reading a handwritten 3, real activations</text>
+    <text x="28" y="196" font-size="11" fill="{t["sub"]}">right: the 2D latent manifold an autoencoder learned for handwritten digits</text>
   </g>
   <line x1="410" y1="30" x2="410" y2="196" stroke="{t["rule"]}"/>
-  {"".join(out)}
+  {body}
 </svg>
 '''
-    open(f"network-{name}.svg", "w").write(svg)
+    open(f"manifold-{name}.svg", "w").write(svg)
 
-print(f"test accuracy {ACC:.3f}, digit index {i}, predicted {pred}")
+print(f"reconstruction R^2 {R2:.3f}, latent range {lo.round(2)} to {hi.round(2)}, "
+      f"3D view keeps {pca.explained_variance_ratio_.sum():.1%} of the sheet's variance")

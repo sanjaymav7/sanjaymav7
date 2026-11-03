@@ -1,10 +1,11 @@
-<!-- The network in the banner is a real 64-16-16-10 MLP trained on handwritten
-     digits, drawn reading one held-out 3 with its actual activations.
+<!-- The surface in the banner is the real latent manifold of an autoencoder
+     trained on handwritten digits: its decoder swept over a 2D grid, placed in 3D
+     by PCA, with the actual digits sitting where the encoder put them.
      Regenerate with `python3 make_banner.py`. -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="network-dark.svg">
-  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="network-light.svg" width="806">
+  <source media="(prefers-color-scheme: dark)" srcset="manifold-dark.svg">
+  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="manifold-light.svg" width="806">
 </picture>
 
 Hi! I'm Sanjay. I study Mathematics & Computing (Mathematical Intelligence &
