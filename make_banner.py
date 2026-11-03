@@ -1,12 +1,17 @@
-"""Draws montecarlo-{light,dark}.svg, the profile banner. The paths are not a drawing.
+"""Draws montecarlo-live-{light,dark}.svg, the animated profile banner. The paths are not a drawing.
 
 20,000 stock-price paths are simulated under geometric Brownian motion
 (S0 = 100, r = 5%, sigma = 30%, one year of daily steps). 48 of them, sampled
-from the paths that stay inside the plotted price range, are drawn in 3D, fanned out in depth by where they finish and coloured
-the same way. At the end of the time axis sits the histogram of where all
-20,000 finished, with the exact lognormal density drawn over it, and the
-caption prices an at-the-money call from the simulation next to
-Black-Scholes.
+from the paths that stay inside the plotted price range, are drawn in 3D,
+fanned out in depth by where they finish and coloured the same way.
+
+The SVG animates itself with CSS (GitHub shows README images as <img>, where
+scripts can't run but CSS animation does): the paths trace out across the
+year in random order and fade in a rolling loop, the histogram of where the
+paths finished fills in as the count climbs from 2,000 to 20,000, converging
+on the exact lognormal density, and the caption prices an at-the-money call
+from the paths so far next to Black-Scholes. It replays the same run each
+time; with reduced motion on, the finished frame shows still.
 
     python3 make_banner.py
 """
@@ -48,6 +53,9 @@ yc = (edges[:-1] + edges[1:]) / 2
 m, s = np.log(S0) + (R - 0.5 * SIG**2) * T, SIG * np.sqrt(T)
 dens = norm.pdf(yc, m, s)                      # density of log S_T, exact
 w = 0.55 / max(hist.max(), dens.max())
+STAGES = [2_000, 5_000, 10_000, 20_000]
+stage_hist = [np.histogram(logS[:n, -1], bins=edges, density=True)[0] for n in STAGES]
+stage_price = [(pay[:n].mean(), pay[:n].std(ddof=1) / np.sqrt(n)) for n in STAGES]
 yb = lambda v: (v - ymid) / yspan * 0.85
 
 YAW, PITCH, CAM = np.radians(-34), np.radians(27), 4.2
@@ -69,9 +77,13 @@ def proj(q):
 
 FLOOR = min(p[:, 1].min() for p in paths3) - 0.08   # just under the lowest path drawn
 floor = np.array([[-1, FLOOR, -0.85], [1.62, FLOOR, -0.85], [1.62, FLOOR, 0.85], [-1, FLOOR, 0.85]])
-hist_poly = [np.array([[1.04, yb(edges[i]), 0], [1.04 + hist[i] * w, yb(edges[i]), 0],
-                       [1.04 + hist[i] * w, yb(edges[i + 1]), 0], [1.04, yb(edges[i + 1]), 0]])
-             for i in range(len(hist))]
+def bars(h):
+    return [np.array([[1.04, yb(edges[i]), 0], [1.04 + h[i] * w, yb(edges[i]), 0],
+                      [1.04 + h[i] * w, yb(edges[i + 1]), 0], [1.04, yb(edges[i + 1]), 0]])
+            for i in range(len(h))]
+
+
+hist_poly = bars(hist)
 curve = np.column_stack([1.04 + dens * w, yb(yc), np.zeros_like(yc)])
 
 everything = np.vstack(paths3 + hist_poly + [curve, floor])
@@ -102,6 +114,27 @@ THEMES = {
                  low="#ff7b72", mid="#d2a8ff", high="#58a6ff", bar="#58a6ff", curve="#f0f6fc"),
 }
 
+CYCLE = 10.0                                   # seconds per loop
+order = np.random.default_rng(3).permutation(SHOW)
+delay = {k: 3.0 * r / SHOW for r, k in enumerate(order)}   # paths launch over the first 3 s
+WINDOWS = [(15, 30), (30, 45), (45, 60), (60, 92)]        # % of the cycle each stage is on screen
+
+
+def window(a, b):
+    on = f"{a}%,{b - 1}%{{opacity:1}}{b}%,100%{{opacity:0}}"
+    return on if a == 0 else f"0%,{a - 1}%{{opacity:0}}" + on
+
+
+STYLE = (
+    "@keyframes draw{0%{stroke-dashoffset:1;opacity:1}30%{stroke-dashoffset:0;opacity:1}"
+    "82%{stroke-dashoffset:0;opacity:1}92%,100%{stroke-dashoffset:0;opacity:0}}"
+    f".p{{stroke-dasharray:1;animation:draw {CYCLE:g}s linear infinite both}}"
+    + "".join(f"@keyframes s{i}{{{window(a, b)}}}.s{i}{{animation:s{i} {CYCLE:g}s linear infinite both}}"
+              for i, (a, b) in enumerate([(0, 15)] + WINDOWS))
+    + ".st{opacity:0}.st.last{opacity:1}"
+    + "@media (prefers-reduced-motion:reduce){.p,.st{animation:none}}"
+)
+
 for name, t in THEMES.items():
     out = [f'<polygon points="{pts(floor)}" fill="{t["grid"]}" fill-opacity="0.05"/>']
     for gx in np.linspace(-1, 1, 5):              # floor grid: quarters of the year
@@ -110,39 +143,48 @@ for name, t in THEMES.items():
     for gz in np.linspace(-0.85, 0.85, 5):
         out.append(f'<polyline points="{pts(np.array([[-1, FLOOR, gz], [1.62, FLOOR, gz]]))}" '
                    f'stroke="{t["grid"]}" stroke-opacity="0.18" stroke-width="0.6" fill="none"/>')
-    # paths back to front; nearer ones are brighter and thicker
-    for p3, r_, z in zip(paths3, rank, zs):
+
+    def path_svg(k):
+        p3, r_, z = paths3[k], rank[k], zs[k]
         col = mix(t["low"], t["mid"], r_ * 2) if r_ < 0.5 else mix(t["mid"], t["high"], r_ * 2 - 1)
         near = (0.75 - z) / 1.5
-        if z > 0:
-            continue
-        out.append(f'<polyline points="{pts(p3)}" fill="none" stroke="{col}" stroke-width="{0.7 + 0.8 * near:.2f}" '
-                   f'stroke-opacity="{0.35 + 0.5 * near:.2f}" stroke-linejoin="round"/>')
-    for poly in hist_poly:
-        out.append(f'<polygon points="{pts(poly)}" fill="{t["bar"]}" fill-opacity="0.28" '
-                   f'stroke="{t["bar"]}" stroke-opacity="0.5" stroke-width="0.5"/>')
+        return (f'<polyline class="p" pathLength="1" style="animation-delay:{delay[k]:.2f}s" points="{pts(p3)}" '
+                f'fill="none" stroke="{col}" stroke-width="{0.7 + 0.8 * near:.2f}" '
+                f'stroke-opacity="{0.35 + 0.5 * near:.2f}" stroke-linejoin="round"/>')
+
+    # back half of the fan, then the histogram stages, then the front half over them
+    out += [path_svg(k) for k in range(SHOW) if zs[k] <= 0]
+    for i, h in enumerate(stage_hist):
+        last = " last" if i == len(STAGES) - 1 else ""
+        polys = "".join(f'<polygon points="{pts(poly)}"/>' for poly in bars(h))
+        out.append(f'<g class="st s{i + 1}{last}" fill="{t["bar"]}" fill-opacity="0.28" stroke="{t["bar"]}" '
+                   f'stroke-opacity="0.5" stroke-width="0.5">{polys}</g>')
     out.append(f'<polyline points="{pts(curve)}" fill="none" stroke="{t["curve"]}" stroke-width="1.3" stroke-opacity="0.85"/>')
-    for p3, r_, z in zip(paths3, rank, zs):     # front half of the fan, drawn over the histogram
-        if z <= 0:
-            continue
-        col = mix(t["low"], t["mid"], r_ * 2) if r_ < 0.5 else mix(t["mid"], t["high"], r_ * 2 - 1)
-        near = (0.75 - z) / 1.5
-        out.append(f'<polyline points="{pts(p3)}" fill="none" stroke="{col}" stroke-width="{0.7 + 0.8 * near:.2f}" '
-                   f'stroke-opacity="{0.35 + 0.5 * near:.2f}" stroke-linejoin="round"/>')
+    out += [path_svg(k) for k in range(SHOW) if zs[k] > 0]
+
+    cap = f'<text x="28" y="196" font-size="11" fill="{t["sub"]}" class="st s{{}}{{}}">{{}}</text>'
+    captions = [cap.format(0, "", "right: a live Monte Carlo run, pricing a call option")]
+    for i, (n, (mcn, sen)) in enumerate(zip(STAGES, stage_price)):
+        captions.append(cap.format(i + 1, " last" if i == len(STAGES) - 1 else "",
+                                   f"right: {n:,} Monte Carlo paths · call {mcn:.2f} ± {sen:.2f} "
+                                   f"vs Black-Scholes {bs:.2f}"))
 
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="806" height="220" viewBox="0 0 806 220">
+  <style>{STYLE}</style>
   <rect width="806" height="220" rx="10" fill="{t["bg"]}"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
     <text x="28" y="72" font-size="34" font-weight="700" fill="{t["fg"]}">Sanjay Mavalli</text>
     <text x="28" y="104" font-size="15" fill="{t["fg"]}">Co-founder &amp; CEO, SAAChronicle (Sacron)</text>
     <text x="28" y="128" font-size="15" fill="{t["sub"]}">Math &amp; Computing @ Georgia Tech</text>
     <text x="28" y="152" font-size="15" fill="{t["sub"]}">quant models · ML · number theory</text>
-    <text x="28" y="196" font-size="11" fill="{t["sub"]}">right: {PATHS:,} Monte Carlo paths · call {mc:.2f} ± {se:.2f} vs Black-Scholes {bs:.2f}</text>
+    {"".join(captions)}
   </g>
   <line x1="410" y1="30" x2="410" y2="196" stroke="{t["rule"]}"/>
   {"".join(out)}
 </svg>
 '''
-    open(f"montecarlo-{name}.svg", "w").write(svg)
+    open(f"montecarlo-live-{name}.svg", "w").write(svg)
 
+for n, (mcn, sen) in zip(STAGES, stage_price):
+    print(f"{n:>6,} paths: call {mcn:.3f} ± {sen:.3f}")
 print(f"MC call {mc:.3f} ± {se:.3f}, Black-Scholes {bs:.3f}, |diff| = {abs(mc - bs) / se:.2f} standard errors")

@@ -1,11 +1,11 @@
-<!-- The banner is a real Monte Carlo run: 20,000 simulated stock paths, a sample
-     drawn in 3D, where all of them ended against the exact lognormal density, and
-     the simulated call price next to Black-Scholes. Regenerate with
-     `python3 make_banner.py`. -->
+<!-- The banner is a real Monte Carlo run, animated with CSS inside the SVG: 20,000
+     simulated stock paths, a sample tracing out in 3D, the histogram of where they
+     ended filling in toward the exact lognormal density, and the running call price
+     next to Black-Scholes. Regenerate with `python3 make_banner.py`. -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="montecarlo-dark.svg">
-  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="montecarlo-light.svg" width="806">
+  <source media="(prefers-color-scheme: dark)" srcset="montecarlo-live-dark.svg">
+  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="montecarlo-live-light.svg" width="806">
 </picture>
 
 Hi! I'm Sanjay. I study Mathematics & Computing (Mathematical Intelligence &
