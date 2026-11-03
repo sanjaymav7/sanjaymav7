@@ -52,16 +52,17 @@ and Heston and Bates against 200,000-path Monte Carlo at three strikes.
   <img src="https://raw.githubusercontent.com/sanjaymav7/options-lab/main/docs/smile_light.svg" width="100%" alt="implied volatility smiles from Heston and Bates prices against a flat Black-Scholes line" />
 </picture>
 
-**[hd-modifier-forest](https://github.com/sanjaymav7/hd-modifier-forest)** &nbsp;·&nbsp; Huntington's modifier genes, without batch leakage\
-The random-forest pipeline from my research with Dr. Asha Pillai: nested
-GridSearchCV inside leave-one-cohort-out, per-cohort normalisation, then
-Spearman against CAG repeat length. On a synthetic cohort with planted
-answers, it ranks **all 12 planted modifiers** in its top 20 and **none of
-the 30 batch-only decoys**.
+**[hd-modifier-forest](https://github.com/sanjaymav7/hd-modifier-forest)** &nbsp;·&nbsp; Huntington's on real GEO cohorts, with an honest AUC\
+The random-forest pipeline from my research with Dr. Asha Pillai, rebuilt
+after finding that three of its four datasets never loaded, so it had
+trained on 14 people. Now it covers 207 samples with nested CV and covariates
+removed in-fold. In prefrontal cortex it reaches **AUC 0.996** after
+adjustment, ranking developmental HOX genes on top as the original study
+found. In blood it **doesn't beat age alone**, and the README says so.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sanjaymav7/hd-modifier-forest/main/docs/ranking_dark.svg">
-  <img src="https://raw.githubusercontent.com/sanjaymav7/hd-modifier-forest/main/docs/ranking_light.svg" width="100%" alt="gene importances before and after per-cohort normalisation" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sanjaymav7/hd-modifier-forest/main/docs/auc_dark.svg">
+  <img src="https://raw.githubusercontent.com/sanjaymav7/hd-modifier-forest/main/docs/auc_light.svg" width="100%" alt="held-out AUC in blood and brain against age alone" />
 </picture>
 
 **[partition-primes](https://github.com/sanjaymav7/partition-primes)** &nbsp;·&nbsp; integer partitions that detect the primes\
