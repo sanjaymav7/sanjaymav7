@@ -1,4 +1,4 @@
-"""Draws montecarlo-live-{light,dark}.svg, the animated profile banner. The paths are not a drawing.
+"""Draws banner-mc-{light,dark}.svg, the animated profile banner. The paths are not a drawing.
 
 20,000 stock-price paths are simulated under geometric Brownian motion
 (S0 = 100, r = 5%, sigma = 30%, one year of daily steps). 48 of them, sampled
@@ -173,17 +173,16 @@ for name, t in THEMES.items():
   <style>{STYLE}</style>
   <rect width="806" height="220" rx="10" fill="{t["bg"]}"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
-    <text x="28" y="72" font-size="34" font-weight="700" fill="{t["fg"]}">Sanjay Mavalli</text>
-    <text x="28" y="104" font-size="15" fill="{t["fg"]}">Co-founder &amp; CEO, SAAChronicle (Sacron)</text>
-    <text x="28" y="128" font-size="15" fill="{t["sub"]}">Math &amp; Computing @ Georgia Tech</text>
-    <text x="28" y="152" font-size="15" fill="{t["sub"]}">quant models · ML · number theory</text>
+    <text x="28" y="84" font-size="34" font-weight="700" fill="{t["fg"]}">Sanjay Mavalli</text>
+    <text x="28" y="117" font-size="15" fill="{t["fg"]}">Co-founder &amp; CEO, <tspan font-weight="700" fill="{t["high"]}">SAAChronicle (Sacron)</tspan></text>
+    <text x="28" y="142" font-size="15" fill="{t["sub"]}">Math &amp; Computing @ <tspan font-weight="600" fill="{t["fg"]}">Georgia Tech</tspan></text>
     {"".join(captions)}
   </g>
   <line x1="410" y1="30" x2="410" y2="196" stroke="{t["rule"]}"/>
   {"".join(out)}
 </svg>
 '''
-    open(f"montecarlo-live-{name}.svg", "w").write(svg)
+    open(f"banner-mc-{name}.svg", "w").write(svg)
 
 for n, (mcn, sen) in zip(STAGES, stage_price):
     print(f"{n:>6,} paths: call {mcn:.3f} ± {sen:.3f}")
