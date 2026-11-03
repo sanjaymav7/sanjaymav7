@@ -138,9 +138,7 @@ and Heston and Bates against 200,000-path Monte Carlo at three strikes.
 
 ## Outside the code
 
-President of Glenelg's National Math Honor Society and co-director of the
-DECAGON math tournament. Ran judging and outreach for Hack the Colosseum (150+
-hackers, $10k+ in-kind). Otherwise: Indian classical music, philosophy, number
+Indian classical music, philosophy, number
 theory, tennis and poker.
 
 Reach me at **sanjaymavalli@gatech.edu** or on
