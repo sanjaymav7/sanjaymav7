@@ -1,5 +1,6 @@
-<!-- The curves in the banner are a real Fokker-Planck solve from probability-wave,
-     not an illustration. Regenerate with `python3 make_banner.py`. -->
+<!-- The network in the banner is a real 64-16-16-10 MLP trained on handwritten
+     digits, drawn reading one held-out 3 with its actual activations.
+     Regenerate with `python3 make_banner.py`. -->
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="banner-dark.svg">
@@ -95,6 +96,17 @@ quasimodular partition variants.
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sanjaymav7/partition-primes/main/docs/criterion_dark.svg">
   <img src="https://raw.githubusercontent.com/sanjaymav7/partition-primes/main/docs/criterion_light.svg" width="100%" alt="a partition identity that is positive for composites and exactly zero at primes" />
+</picture>
+
+**[options-lab](https://github.com/sanjaymav7/options-lab)** &nbsp;·&nbsp; Black-Scholes to Heston to Bates, each checked\
+Prices and greeks, an American-exercise binomial lattice, and Heston and Bates
+by characteristic-function inversion. **15 of 15 checks pass**: against Hull's
+worked examples, put-call parity to 7e-15, greeks against finite differences,
+and Heston and Bates against 200,000-path Monte Carlo at three strikes.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sanjaymav7/options-lab/main/docs/smile_dark.svg">
+  <img src="https://raw.githubusercontent.com/sanjaymav7/options-lab/main/docs/smile_light.svg" width="100%" alt="implied volatility smiles from Heston and Bates prices against a flat Black-Scholes line" />
 </picture>
 
 ## Experience
