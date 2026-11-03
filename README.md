@@ -8,8 +8,7 @@
 
 Hi! I'm Sanjay. I study Mathematics & Computing (Mathematical Intelligence &
 Data Science) at Georgia Tech, and I'm the co-founder and CEO of
-**SAAChronicle (Sacron)**. Most of what's here is quantitative modelling,
-built so each claim comes with the check that backs it: pricing models
+**SAAChronicle (Sacron)**, a ML optimization startup. Pricing models
 against textbook values and Monte Carlo, a PDE solver against its closed
 form, and forecasters scored over a thousand-plus windows.
 
