@@ -3,8 +3,8 @@
      Regenerate with `python3 make_banner.py`. -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="banner-dark.svg">
-  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="banner-light.svg" width="806">
+  <source media="(prefers-color-scheme: dark)" srcset="network-dark.svg">
+  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="network-light.svg" width="806">
 </picture>
 
 Hi! I'm Sanjay. I study Mathematics & Computing (Mathematical Intelligence &

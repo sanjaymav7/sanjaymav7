@@ -1,4 +1,4 @@
-"""Draws banner-{light,dark}.svg. The network is not a drawing.
+"""Draws network-{light,dark}.svg, the profile banner. The network is not a drawing.
 
 A 64-16-16-10 multilayer perceptron is trained on scikit-learn's handwritten
 digits, then shown reading one held-out digit. The first layer is that
@@ -140,6 +140,6 @@ for name, t in THEMES.items():
   {"".join(out)}
 </svg>
 '''
-    open(f"banner-{name}.svg", "w").write(svg)
+    open(f"network-{name}.svg", "w").write(svg)
 
 print(f"test accuracy {ACC:.3f}, digit index {i}, predicted {pred}")
