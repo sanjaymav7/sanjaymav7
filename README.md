@@ -10,11 +10,7 @@
 
 Hi! I'm Sanjay. I study **Mathematics & Computing** (Mathematical Intelligence &
 Data Science) at **Georgia Tech**, and I'm the co-founder and CEO of
-**SAAChronicle (Sacron)**, a ML optimization startup. Most of what's here is
-modelling built so *each claim comes with the check that backs it*: a lake
-simulated from its **real lakebed**, a PDE solver against its **closed form**,
-forecasters scored over **a thousand-plus windows**, and a disease classifier
-held against **age alone**.
+**SAAChronicle (Sacron)**, a ML optimization startup.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="skills-dark.svg">
