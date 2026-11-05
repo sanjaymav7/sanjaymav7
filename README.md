@@ -193,5 +193,5 @@ and Heston and Bates against **200,000-path Monte Carlo** at three strikes.
 
 **Indian classical music**, **philosophy**, **number theory**, **tennis** and **poker**.
 
-Reach me at **sanjaymavalli@gatech.edu** or on
+Reach me at **sanjay.mavalli@gatech.edu** or on
 [LinkedIn](https://www.linkedin.com/in/sanjay-mavalli-912062322).
