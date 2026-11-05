@@ -1,4 +1,4 @@
-"""Draws banner-mc-{light,dark}.svg, the animated profile banner. The paths are not a drawing.
+"""Draws banner-navy-{light,dark}.svg, the animated profile banner. The paths are not a drawing.
 
 20,000 stock-price paths are simulated under geometric Brownian motion
 (S0 = 100, r = 5%, sigma = 30%, one year of daily steps). 48 of them, sampled
@@ -110,7 +110,7 @@ def mix(a, b, t):
 THEMES = {
     "light": dict(bg="#ffffff", fg="#1f2328", sub="#59636e", rule="#d1d9e0", grid="#8c959f",
                   low="#cf222e", mid="#8250df", high="#0969da", bar="#0969da", curve="#1f2328"),
-    "dark": dict(bg="#0d1117", fg="#f0f6fc", sub="#9198a1", rule="#3d444d", grid="#6e7681",
+    "dark": dict(bg="#04060c", bg_top="#0c1a3d", fg="#f0f6fc", sub="#9198a1", rule="#3d444d", grid="#6e7681",
                  low="#ff7b72", mid="#d2a8ff", high="#58a6ff", bar="#58a6ff", curve="#f0f6fc"),
 }
 
@@ -171,7 +171,9 @@ for name, t in THEMES.items():
 
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="806" height="220" viewBox="0 0 806 220">
   <style>{STYLE}</style>
-  <rect width="806" height="220" rx="10" fill="{t["bg"]}"/>
+  <defs><linearGradient id="bannerbg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="{t.get("bg_top", t["bg"])}"/><stop offset="1" stop-color="{t["bg"]}"/></linearGradient></defs>
+  <rect width="806" height="220" rx="10" fill="url(#bannerbg)"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
     <text x="28" y="84" font-size="34" font-weight="700" fill="{t["fg"]}">Sanjay Mavalli</text>
     <text x="28" y="117" font-size="15" fill="{t["fg"]}">Co-founder &amp; CEO, <tspan font-weight="700" fill="{t["high"]}">SAAChronicle (Sacron)</tspan></text>
@@ -182,7 +184,7 @@ for name, t in THEMES.items():
   {"".join(out)}
 </svg>
 '''
-    open(f"banner-mc-{name}.svg", "w").write(svg)
+    open(f"banner-navy-{name}.svg", "w").write(svg)
 
 for n, (mcn, sen) in zip(STAGES, stage_price):
     print(f"{n:>6,} paths: call {mcn:.3f} ± {sen:.3f}")

@@ -1,4 +1,4 @@
-"""Draws skills-{light,dark}.svg (coloured skill chips) and rule-{light,dark}.svg (section divider).
+"""Draws skills-{light,dark}.svg (coloured skill chips) and divider-{light,dark}.svg (section divider).
 
     python3 make_chips.py
 """
@@ -10,9 +10,9 @@ GROUPS = [
 ]
 THEMES = {
     "light": dict(label="#59636e", blue="#0969da", purple="#8250df", green="#1a7f37", orange="#bc4c00",
-                  red="#cf222e", text_op=1.0, fill_op=0.10),
+                  red="#cf222e", text_op=1.0, fill_op=0.10, rule_edge="#0b1020", rule_mid="#1e3a8a"),
     "dark": dict(label="#9198a1", blue="#58a6ff", purple="#d2a8ff", green="#3fb950", orange="#ffa657",
-                 red="#ff7b72", text_op=1.0, fill_op=0.14),
+                 red="#ff7b72", text_op=1.0, fill_op=0.14, rule_edge="#0e1d45", rule_mid="#3b6fe8"),
 }
 FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
 W, CHIP_H, GAP, ROW_H = 806, 24, 7, 34
@@ -48,12 +48,12 @@ for name, t in THEMES.items():
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{h:.0f}" viewBox="0 0 {W} {h:.0f}">'
         f'<g font-family="{FONT}">{"".join(parts)}</g></svg>\n')
 
-    open(f"rule-{name}.svg", "w").write(
+    open(f"divider-{name}.svg", "w").write(
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="14" viewBox="0 0 {W} 14">'
         f'<defs><linearGradient id="g" x1="0" x2="1">'
-        f'<stop offset="0" stop-color="{t["red"]}" stop-opacity="0"/>'
-        f'<stop offset="0.2" stop-color="{t["red"]}"/><stop offset="0.5" stop-color="{t["purple"]}"/>'
-        f'<stop offset="0.8" stop-color="{t["blue"]}"/>'
-        f'<stop offset="1" stop-color="{t["blue"]}" stop-opacity="0"/></linearGradient></defs>'
+        f'<stop offset="0" stop-color="{t["rule_edge"]}" stop-opacity="0"/>'
+        f'<stop offset="0.25" stop-color="{t["rule_edge"]}"/><stop offset="0.5" stop-color="{t["rule_mid"]}"/>'
+        f'<stop offset="0.75" stop-color="{t["rule_edge"]}"/>'
+        f'<stop offset="1" stop-color="{t["rule_edge"]}" stop-opacity="0"/></linearGradient></defs>'
         f'<rect x="0" y="6" width="{W}" height="2" rx="1" fill="url(#g)"/>'
-        f'<circle cx="{W / 2}" cy="7" r="3.5" fill="{t["purple"]}"/></svg>\n')
+        f'<circle cx="{W / 2}" cy="7" r="3.5" fill="{t["rule_mid"]}"/></svg>\n')

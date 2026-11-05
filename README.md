@@ -4,8 +4,8 @@
      next to Black-Scholes. Regenerate with `python3 make_banner.py`. -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="banner-mc-dark.svg">
-  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="banner-mc-light.svg" width="806">
+  <source media="(prefers-color-scheme: dark)" srcset="banner-navy-dark.svg">
+  <img alt="Sanjay Mavalli, Co-founder and CEO of SAAChronicle (Sacron), Math and Computing at Georgia Tech" src="banner-navy-light.svg" width="806">
 </picture>
 
 Hi! I'm Sanjay. I study **Mathematics & Computing** (Mathematical Intelligence &
@@ -18,42 +18,32 @@ Data Science) at **Georgia Tech**, and I'm the co-founder and CEO of
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
-## &#9670;&nbsp; Sacron: tracing unfair models back to the data that made them
-
-When a model starts treating a group of people unfairly, the cause usually
-isn't the model. It's an upstream change nobody connected to it: a redefined
-segment, a new join, a backfill. **Sacron**, which I co-founded with
-[**Aryan Bhan**](https://github.com/AryanB-07), scores every table, feature and
-model in a company's **data lineage graph** for *fairness and drift*. When a
-model crosses its threshold, it walks the lineage **backward to the change that
-started it**: first the table, then the columns feeding the model, then the
-**exact SQL line**.
+## &#9670;&nbsp; Sacron
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sacron-trace-dark.svg">
   <img src="sacron-trace-light.svg" width="100%" alt="a lineage graph where a flagged credit model is traced back through features and staging tables to a redefined marketing segment, and the changed SQL line" />
 </picture>
 
-<sub>From Sacron's demo scenario. <code>credit_approval_v3</code> falls to a 0.69 disparate impact ratio, under the 0.70 flag. The trace walks back through four hops to a Marketing view whose one added line, <i>require 3+ years of tenure</i>, cut fairness by 0.29 in a week. The trace here is recomputed with the product's root-cause rule: blame the biggest drop that none of the node's own parents explains.</sub>
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sacron-scores-dark.svg">
   <img src="sacron-scores-light.svg" width="100%" alt="weekly fairness scores along the traced path, all falling right after the segment change, while an unrelated model stays flat" />
 </picture>
 
-<sub>The same story over six weeks. Everything downstream of the change falls the same week, while <code>churn_risk_v1</code>, which never touches that segment, stays flat. That pattern is how the trace tells a cause from a symptom.</sub>
+## &#9670;&nbsp; Simulations
 
-- **Customer data stays put.** Scoring runs next to the data, and only aggregates leave.
-- **It plugs into the lineage teams already have:** OpenLineage and dbt.
-- **It lives where engineers work:** VS Code, Cursor, JetBrains IDEs, Eclipse, Vim, Emacs and more, with alerts when a score crosses its threshold.
+<p>
+  <img src="fedavg.svg" width="49%" alt="federated averaging: five clients take local gradient steps toward their own optima and the server averages them each round, settling slightly off the global optimum" />
+  <img src="mcmc.svg" width="49%" alt="a Metropolis-Hastings chain exploring a banana-shaped density, its samples filling in the shape" />
+</p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## &#9654;&nbsp; [Aquatic Twin: a live 3D model of Lake Erie](https://github.com/sjfan910/grokathon2026)
@@ -88,8 +78,8 @@ a labelled simulated operator. There's also a
 needed.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## Now
@@ -103,8 +93,8 @@ options theory to model *asymmetric probability distributions* for text
 forecasting, and fixing backend and RAG logic in the team's codebase.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## Projects
@@ -159,8 +149,8 @@ and Heston and Bates against **200,000-path Monte Carlo** at three strikes.
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## Experience
@@ -182,8 +172,8 @@ and Heston and Bates against **200,000-path Monte Carlo** at three strikes.
   issues.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## Writing & talks
@@ -196,8 +186,8 @@ and Heston and Bates against **200,000-path Monte Carlo** at three strikes.
   autism with an optimised CNN
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="rule-dark.svg">
-  <img alt="" src="rule-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="divider-dark.svg">
+  <img alt="" src="divider-light.svg" width="100%">
 </picture>
 
 ## Outside the code
