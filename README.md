@@ -159,7 +159,6 @@ and Heston and Bates against **200,000-path Monte Carlo** at three strikes.
 | :-- | :-- | :-- |
 | **SAAChronicle (Sacron)** | Co-founder & CEO | now |
 | **SimpliEarn**, Big Data Big Impact @ Georgia Tech | Financial research & SWE | 09/26 – now |
-| **Exeter22** × Harvard Ventures TECH Summer Program | Intern | 07/25 – 08/25 |
 | **AI Sense**, UMBC | Lead intern, AI/ML team | 11/24 – 05/26 |
 | **Solving Generational Huntington's** | Student researcher under Dr. Asha Pillai | 01/26 – 05/26 |
 
