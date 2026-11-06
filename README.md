@@ -34,8 +34,6 @@ Data Science) at **Georgia Tech**, and I'm the co-founder and CEO of
   <img src="sacron-scores-light.svg" width="100%" alt="weekly fairness scores along the traced path, all falling right after the segment change, while an unrelated model stays flat" />
 </picture>
 
-## &#9670;&nbsp; Simulations
-
 <p>
   <img src="fedavg.svg" width="49%" alt="federated averaging: five clients take local gradient steps toward their own optima and the server averages them each round, settling slightly off the global optimum" />
   <img src="mcmc.svg" width="49%" alt="a Metropolis-Hastings chain exploring a banana-shaped density, its samples filling in the shape" />
